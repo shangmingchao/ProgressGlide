@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.frank.glide.MainActivity">
+
+    <ImageView
+        android:id="@+id/iv_0"
+        android:layout_width="200dp"
+        android:layout_height="200dp" />
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progress="0"
+        android:max="100"
+        style="?android:attr/progressBarStyleHorizontal"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/progress_text_view"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+    </ScrollView>
+</LinearLayout>
