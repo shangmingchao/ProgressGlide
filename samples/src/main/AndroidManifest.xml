@@ -14,10 +14,7 @@
         android:theme="@style/AppTheme">
 
         <meta-data
-            android:name="com.bumptech.glide.integration.okhttp3.OkHttpGlideModule"
-            tools:node="remove" />
-        <meta-data
-            android:name="com.frank.progressglide.OkHttpProgressGlideModule"
+            android:name="com.frank.progressglide.progress.OkHttpProgressGlideModule"
             android:value="GlideModule" />
 
         <activity android:name=".MainActivity">

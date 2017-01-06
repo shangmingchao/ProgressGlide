@@ -31,6 +31,5 @@ dependencies {
     //compile 'com.squareup.okhttp:okhttp:2.7.5'
 
     //OkHttp 3.x
-    compile 'com.github.bumptech.glide:okhttp3-integration:1.4.0@aar'
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
 }

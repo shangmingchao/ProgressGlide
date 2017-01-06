@@ -1,5 +1,6 @@
 package com.frank.progressglide;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
+import com.frank.progressglide.progress.ProgressTarget;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,10 +28,12 @@ public class MainActivity extends AppCompatActivity {
         iv_0 = (ImageView) findViewById(R.id.iv_0);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressTextView = (TextView) findViewById(R.id.progress_text_view);
-        final MyProgressTarget myProgressTarget = new MyProgressTarget<>(new BitmapImageViewTarget(iv_0), progressBar, progressTextView);
+        final MyProgressTarget<Bitmap> myProgressTarget = new MyProgressTarget<>(new BitmapImageViewTarget(iv_0), progressBar, progressTextView);
+        String model = "http://inthecheesefactory.com/uploads/source/nestedfragment/fragments.png";
+        myProgressTarget.setModel(model);
         //960 × 533 pixels,25059 bytes
         Glide.with(iv_0.getContext())
-                .load("http://inthecheesefactory.com/uploads/source/nestedfragment/fragments.png")
+                .load(model)
                 .asBitmap()
                 .centerCrop()
                 .into(myProgressTarget);
@@ -47,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public float getGranualityPercentage() {
+        public float getGranularityPercentage() {
             return 0.1f;
         }
 
@@ -72,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onDelivered() {
+            progressTextView.setText("Done");
         }
     }
 
