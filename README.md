@@ -1,6 +1,6 @@
 # ProgressGlide
 Monitor the progress of resource loading in Glide.
-<p> Modified from [that point](https://github.com/shangmingchao/ProgressGlide/tree/eff4e2a07f4a3ce4b3d750164bcf6533b2f59821), the previous custom `DataFetcher` and `ModelLoader` is not elegant enough as [TWiStErRob](https://github.com/TWiStErRob)/Integration Libraries did.</p>
+Modified from [that point](https://github.com/shangmingchao/ProgressGlide/tree/eff4e2a07f4a3ce4b3d750164bcf6533b2f59821), the previous custom `DataFetcher` and `ModelLoader` is not elegant enough as [TWiStErRob](https://github.com/TWiStErRob)/Integration Libraries did.
 ![unfinished](https://github.com/shangmingchao/ProgressGlide/blob/master/screenshots/com.frank.progressglide_unfinished.png)
 ![finished](https://github.com/shangmingchao/ProgressGlide/blob/master/screenshots/com.frank.progressglide_finished.png)
 Thanks
