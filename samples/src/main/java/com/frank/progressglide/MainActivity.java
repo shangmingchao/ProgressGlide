@@ -60,9 +60,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onDownloading(long bytesRead, long expectedLength) {
+            Log.d(TAG, "onDownloading: " + (int) (100 * bytesRead / expectedLength));
             progressBar.setProgress((int) (100 * bytesRead / expectedLength));
             progressTextView.setText(bytesRead + "/" + expectedLength);
-            Log.e("zzzz", bytesRead + "/" + expectedLength);
         }
 
         @Override
@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onDelivered() {
+            progressBar.setProgress(100);
             progressTextView.setText("Done");
         }
     }

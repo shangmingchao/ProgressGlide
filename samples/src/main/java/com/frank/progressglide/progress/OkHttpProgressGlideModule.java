@@ -4,6 +4,7 @@ package com.frank.progressglide.progress;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
@@ -102,7 +103,11 @@ public class OkHttpProgressGlideModule extends AppGlideModule{
             if (listener == null) {
                 return;
             }
+
+            Log.d(TAG, "read: total"+bytesRead+"full:"+contentLength);
+
             if (contentLength <= bytesRead) {
+                Log.d(TAG, "update: forget");
                 forget(key);
             }
             if (needsDispatch(key, bytesRead, contentLength, listener.getGranualityPercentage())) {
@@ -163,15 +168,11 @@ public class OkHttpProgressGlideModule extends AppGlideModule{
                 long totalBytesRead = 0L;
                 @Override public long read(Buffer sink, long byteCount) throws IOException {
                     long bytesRead = super.read(sink, byteCount);
-
                     long fullLength = responseBody.contentLength();
                     if (bytesRead == -1) { // this source is exhausted
                         totalBytesRead = fullLength;
                     } else {
                         totalBytesRead += bytesRead;
-                    }
-                    if (fullLength == -1 && bytesRead != -1){ // if fullLength equal -1,fullLength is totalBytesRead + 1
-                        fullLength = totalBytesRead + 1;
                     }
                     progressListener.update(url, totalBytesRead, fullLength);
                     return bytesRead;
