@@ -1,5 +1,6 @@
 package com.frank.progressglide;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,9 +9,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
+import com.frank.progressglide.progress.GlideApp;
 import com.frank.progressglide.progress.ProgressTarget;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,15 +29,11 @@ public class MainActivity extends AppCompatActivity {
         iv_0 = (ImageView) findViewById(R.id.iv_0);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressTextView = (TextView) findViewById(R.id.progress_text_view);
-        final MyProgressTarget<Bitmap> myProgressTarget = new MyProgressTarget<>(new BitmapImageViewTarget(iv_0), progressBar, progressTextView);
+        final MyProgressTarget<Bitmap> myProgressTarget = new MyProgressTarget<>(iv_0.getContext(),new BitmapImageViewTarget(iv_0), progressBar, progressTextView);
         String model = "http://inthecheesefactory.com/uploads/source/nestedfragment/fragments.png";
         myProgressTarget.setModel(model);
         //960 × 533 pixels,25059 bytes
-        Glide.with(iv_0.getContext())
-                .load(model)
-                .asBitmap()
-                .centerCrop()
-                .into(myProgressTarget);
+        GlideApp.with(iv_0.getContext()).asBitmap().load(model).centerCrop().into(myProgressTarget);
     }
 
     static class MyProgressTarget<Z> extends ProgressTarget<String, Z> {
@@ -44,15 +41,15 @@ public class MainActivity extends AppCompatActivity {
         private final ProgressBar progressBar;
         private final TextView progressTextView;
 
-        public MyProgressTarget(Target<Z> target, ProgressBar progressBar, TextView progressTextView) {
-            super(target);
+        public MyProgressTarget(Context context, Target<Z> target, ProgressBar progressBar, TextView progressTextView) {
+            super(context,target);
             this.progressBar = progressBar;
             this.progressTextView = progressTextView;
         }
 
         @Override
-        public float getGranularityPercentage() {
-            return 0.1f;
+        public float getGranualityPercentage() {
+            return super.getGranualityPercentage();
         }
 
         @Override
@@ -63,9 +60,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onDownloading(long bytesRead, long expectedLength) {
+            Log.d(TAG, "onDownloading: " + (int) (100 * bytesRead / expectedLength));
             progressBar.setProgress((int) (100 * bytesRead / expectedLength));
             progressTextView.setText(bytesRead + "/" + expectedLength);
-            Log.e("zzzz", bytesRead + "/" + expectedLength);
         }
 
         @Override
@@ -76,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onDelivered() {
+            progressBar.setProgress(100);
             progressTextView.setText("Done");
         }
     }

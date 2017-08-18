@@ -1,13 +1,17 @@
 package com.frank.progressglide.progress;
 
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.Registry;
+import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.module.GlideModule;
+import com.bumptech.glide.module.AppGlideModule;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,24 +31,24 @@ import okio.ForwardingSource;
 import okio.Okio;
 import okio.Source;
 
-public class OkHttpProgressGlideModule implements GlideModule {
-    @Override
-    public void applyOptions(Context context, GlideBuilder builder) {
+/**
+ * Created by Jelly on 2017/8/16.
+ */
 
-    }
 
-    @Override
-    public void registerComponents(Context context, Glide glide) {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addNetworkInterceptor(createInterceptor(new DispatchingProgressListener()))
-                .build();
-        glide.register(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(client));
+@GlideModule
+public class OkHttpProgressGlideModule extends AppGlideModule{
+    public static final String TAG = "GlideModule";
+
+    @Override public void applyOptions(Context context, GlideBuilder builder) {	}
+    @Override public void registerComponents(Context context, Glide glide, Registry registry) {
+        OkHttpClient client = new OkHttpClient().newBuilder().addInterceptor(createInterceptor(new DispatchingProgressListener())).build();
+        registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(client));
     }
 
     private static Interceptor createInterceptor(final ResponseProgressListener listener) {
         return new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
+            @Override public Response intercept(Chain chain) throws IOException {
                 Request request = chain.request();
                 Response response = chain.proceed(request);
                 return response.newBuilder()
@@ -56,19 +60,16 @@ public class OkHttpProgressGlideModule implements GlideModule {
 
     public interface UIProgressListener {
         void onProgress(long bytesRead, long expectedLength);
-
         /**
          * Control how often the listener needs an update. 0% and 100% will always be dispatched.
-         *
          * @return in percentage (0.2 = call {@link #onProgress} around every 0.2 percent of progress)
          */
-        float getGranularityPercentage();
+        float getGranualityPercentage();
     }
 
     public static void forget(String url) {
         DispatchingProgressListener.forget(url);
     }
-
     public static void expect(String url, UIProgressListener listener) {
         DispatchingProgressListener.expect(url, listener);
     }
@@ -82,7 +83,6 @@ public class OkHttpProgressGlideModule implements GlideModule {
         private static final Map<String, Long> PROGRESSES = new HashMap<>();
 
         private final Handler handler;
-
         DispatchingProgressListener() {
             this.handler = new Handler(Looper.getMainLooper());
         }
@@ -91,26 +91,28 @@ public class OkHttpProgressGlideModule implements GlideModule {
             LISTENERS.remove(url);
             PROGRESSES.remove(url);
         }
-
         static void expect(String url, UIProgressListener listener) {
             LISTENERS.put(url, listener);
         }
 
-        @Override
-        public void update(HttpUrl url, final long bytesRead, final long contentLength) {
+        @Override public void update(HttpUrl url, final long bytesRead, final long contentLength) {
             //System.out.printf("%s: %d/%d = %.2f%%%n", url, bytesRead, contentLength, (100f * bytesRead) / contentLength);
             String key = url.toString();
             final UIProgressListener listener = LISTENERS.get(key);
+
             if (listener == null) {
                 return;
             }
+
+            Log.d(TAG, "read: total"+bytesRead+"full:"+contentLength);
+
             if (contentLength <= bytesRead) {
+                Log.d(TAG, "update: forget");
                 forget(key);
             }
-            if (needsDispatch(key, bytesRead, contentLength, listener.getGranularityPercentage())) {
+            if (needsDispatch(key, bytesRead, contentLength, listener.getGranualityPercentage())) {
                 handler.post(new Runnable() {
-                    @Override
-                    public void run() {
+                    @Override public void run() {
                         listener.onProgress(bytesRead, contentLength);
                     }
                 });
@@ -122,7 +124,7 @@ public class OkHttpProgressGlideModule implements GlideModule {
                 return true;
             }
             float percent = 100f * current / total;
-            long currentProgress = (long) (percent / granularity);
+            long currentProgress = (long)(percent / granularity);
             Long lastProgress = PROGRESSES.get(key);
             if (lastProgress == null || currentProgress != lastProgress) {
                 PROGRESSES.put(key, currentProgress);
@@ -146,18 +148,15 @@ public class OkHttpProgressGlideModule implements GlideModule {
             this.progressListener = progressListener;
         }
 
-        @Override
-        public MediaType contentType() {
+        @Override public MediaType contentType() {
             return responseBody.contentType();
         }
 
-        @Override
-        public long contentLength() {
+        @Override public long contentLength() {
             return responseBody.contentLength();
         }
 
-        @Override
-        public BufferedSource source() {
+        @Override public BufferedSource source() {
             if (bufferedSource == null) {
                 bufferedSource = Okio.buffer(source(responseBody.source()));
             }
@@ -167,9 +166,7 @@ public class OkHttpProgressGlideModule implements GlideModule {
         private Source source(Source source) {
             return new ForwardingSource(source) {
                 long totalBytesRead = 0L;
-
-                @Override
-                public long read(Buffer sink, long byteCount) throws IOException {
+                @Override public long read(Buffer sink, long byteCount) throws IOException {
                     long bytesRead = super.read(sink, byteCount);
                     long fullLength = responseBody.contentLength();
                     if (bytesRead == -1) { // this source is exhausted
@@ -183,4 +180,6 @@ public class OkHttpProgressGlideModule implements GlideModule {
             };
         }
     }
+
+
 }

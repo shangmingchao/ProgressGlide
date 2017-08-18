@@ -1,31 +1,36 @@
 package com.frank.progressglide.progress;
 
+
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
+
 
 public abstract class ProgressTarget<T, Z> extends WrappingTarget<Z> implements OkHttpProgressGlideModule.UIProgressListener {
+    private static String TAG = ProgressTarget.class.getName();
     private T model;
     private boolean ignoreProgress = true;
+    private Context context;
 
-    public ProgressTarget(Target<Z> target) {
-        this(null, target);
+    public ProgressTarget(Context context,Target<Z> target) {
+        this(null, context, target);
     }
 
-    public ProgressTarget(T model, Target<Z> target) {
+    public ProgressTarget(T model, Context context, Target<Z> target) {
         super(target);
         this.model = model;
-    }
-
-    public final T getModel() {
-        return model;
+        this.context = context;
     }
 
     public final void setModel(T model) {
-        Glide.clear(this); // indirectly calls cleanup
+        GlideApp.with(context).clear(this);
         this.model = model;
+    }
+
+    public T getModel() {
+        return model;
     }
 
     /**
@@ -42,9 +47,10 @@ public abstract class ProgressTarget<T, Z> extends WrappingTarget<Z> implements 
     }
 
     @Override
-    public float getGranularityPercentage() {
+    public float getGranualityPercentage() {
         return 1.0f;
     }
+
 
     @Override
     public void onProgress(long bytesRead, long expectedLength) {
@@ -93,6 +99,7 @@ public abstract class ProgressTarget<T, Z> extends WrappingTarget<Z> implements 
         onProgress(0, Long.MAX_VALUE);
     }
 
+
     private void cleanup() {
         ignoreProgress = true;
         T model = this.model; // save in case it gets modified
@@ -108,15 +115,16 @@ public abstract class ProgressTarget<T, Z> extends WrappingTarget<Z> implements 
     }
 
     @Override
-    public void onResourceReady(Z resource, GlideAnimation<? super Z> animation) {
+    public void onResourceReady(Z resource, Transition<? super Z> transition) {
         cleanup();
-        super.onResourceReady(resource, animation);
+        super.onResourceReady(resource, transition);
     }
 
+
     @Override
-    public void onLoadFailed(Exception e, Drawable errorDrawable) {
+    public void onLoadFailed(Drawable errorDrawable) {
         cleanup();
-        super.onLoadFailed(e, errorDrawable);
+        super.onLoadFailed(errorDrawable);
     }
 
     @Override

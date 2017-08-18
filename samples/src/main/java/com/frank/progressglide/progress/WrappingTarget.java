@@ -4,9 +4,9 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
 import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 
 public class WrappingTarget<Z> implements Target<Z> {
 
@@ -16,9 +16,6 @@ public class WrappingTarget<Z> implements Target<Z> {
         this.target = target;
     }
 
-    public @NonNull Target<? super Z> getWrappedTarget() {
-        return target;
-    }
 
     @Override
     public void getSize(SizeReadyCallback cb) {
@@ -31,14 +28,18 @@ public class WrappingTarget<Z> implements Target<Z> {
     }
 
     @Override
-    public void onLoadFailed(Exception e, Drawable errorDrawable) {
-        target.onLoadFailed(e, errorDrawable);
+    public void onLoadFailed(Drawable errorDrawable) {
+        target.onLoadFailed(errorDrawable);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void onResourceReady(Z resource, GlideAnimation<? super Z> glideAnimation) {
-        target.onResourceReady(resource, (GlideAnimation) glideAnimation);
+    public void removeCallback(SizeReadyCallback cb) {
+        target.removeCallback(cb);
+    }
+
+    @Override
+    public void onResourceReady(Z resource, Transition<? super Z> transition) {
+        target.onResourceReady(resource,(Transition)transition);
     }
 
     @Override
